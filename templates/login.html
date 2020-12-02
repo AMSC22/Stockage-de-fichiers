@@ -1,0 +1,36 @@
+{% extends 'Layout.html' %}
+{% block body %}
+    <div class="App">
+            <div class="App__Aside"></div>
+            <div class="App__Form">
+                <div class="PageSwitcher">
+                    <a href="/" class="PageSwitcher__Item PageSwitcher__Item--Active">Sign In</a>
+                    <a href="/register" class="PageSwitcher__Item">Sign Up</a>
+                </div>
+                <div class="FormTitle">
+                    <a href="/" class="FormTitle__Link FormTitle__Link--Active">Sign In</a> or
+                    <a href="/register" class="FormTitle__Link">Sign Up</a>
+                </div>
+                {% include 'includes/messages.html' %}
+                <div class="FormCenter">
+                    <form class="FormFields" action="" method="POST">
+                        <div class="FormField">
+                            <label class="FormField__Label" htmlFor="username">User Name</label>
+                            <input type="text" id="username" class="FormField__Input" placeholder="Enter Your UserName" name="username" value={{request.form.userame}}>
+                        </div>
+                        <div class="FormField">
+                            <label class="FormField__Label" htmlFor="password">Password</label>
+                            <input type="password" id="password" class="FormField__Input" placeholder="Enter Your Password" name="password" value={{request.form.password}}>
+                        </div>
+                        <div class="FormField">
+                            <button class="FormField__Button mr-20">Sign In</button>
+                            <a href="/register" class="FormField__TermsLink"> Create an account </a>
+                        </div>
+                        <div class="FormField">
+                            <a href="/register" class="FormField__TermsLink"> I forgot my password </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+{% endblock %}

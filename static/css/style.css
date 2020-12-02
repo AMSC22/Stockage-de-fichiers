@@ -1,0 +1,72 @@
+ul.child{
+    display: none;
+    width: 100%!important;
+}
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}    
+li{
+    list-style: none;
+}
+ul.parent > li{
+    float: left;
+    width: 20%;
+    text-align: center;
+    padding: 10px;
+    background: #747474;
+    color: white;
+    cursor: pointer;
+    border-right: 1px solid #959595; 
+}
+
+/* --------------------------------------------- */
+
+@import url('http://fonts.googleapis.com/css?family=Roboto:300,400,500,700');
+*{
+    box-sizing: border-box;
+
+}
+
+body{
+    margin: 0;
+    padding: 0;
+    font-family: sans-serif;
+}
+
+.App{
+    height: 100vh;
+    display: flex;
+    column-rule: white;
+}
+
+.App-Aside{
+    width: 50%;
+    background-color: #66DAC7;
+}
+
+.App-form{
+    width: 50%;
+    background-color: #2E4158;
+    padding: 25px 4px;
+    overflow: auto;
+}
+
+.PageSwitcher{
+
+}
+
+.FormField-Checkbox{
+    position: relative;
+    top: 1.5px;
+}
+
+.FormField-TermLink{
+    color: white;
+    border-bottom: 1px solid #199887;
+    text-decoration: none;
+    display: inline-block;
+    padding-bottom: 2px;
+    margin-left: 5px;
+}

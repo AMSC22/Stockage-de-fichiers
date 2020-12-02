@@ -1,0 +1,11 @@
+{% extends 'Layout.html' %}
+
+{% block body %}
+    <h1>About Us</h1>
+    <p>lorem ipsum dolor sit amet, consectetor adipisicing elit, sed do eiusmod tempor incident pidat non proident, sun in culpa qui officia deservunt mollit anim id est laborum.</p>
+    <ul class="list-group">
+        {% for article in donnes %}
+            <li class="list-group-item">{{article}}</a></li>
+        {% endfor %}
+    </ul><!--  --><!--  -->
+{% endblock  %}

@@ -1,0 +1,75 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+<script>
+    $(function(){
+    $('ul.parent > li').hover(function(){
+        $(this).find('ul.child').show(400);
+    }, function(){
+        $(this).find('ul.child').hide(400);
+    });
+    });
+    </script>
+    <h1>Dashboard <small> Welcome {{session.username}}</small></h1>
+    
+    <form class="btn btn-success" action="/dashboard" method="POST">
+        <select class="btn btn-success" size="1" name="documents">
+            <option selected >Add New Things </option>
+            <option value="folder"><a href="#" >Add New Folder</a></option>
+            <option value="file"><a href="#" >Add New File </a></option>
+        </select>
+        <input type="submit" value="Submit">
+    </form>
+
+    <ul class="parent">
+            <li>Item 1</li>
+            <li>Item 2
+                <ul class="child">
+                    <li>Item 2.1</li>
+                    <li>Item 2.2</li>
+                    <li>Item 2.3</li>
+                    <li>Item 2.4</li>
+                </ul>
+            </li>
+        </ul>
+
+    <hr>
+    <table class="table table-striped">
+        <tr>
+            <th>ID</th>
+            <th>Names</th>
+            <th>Modifié le</th>
+            <th>Type</th>
+            <th>Taille</th>
+            <th></th>
+        </tr>
+
+        
+        {% if images %}
+        {% for img in images %}
+        <tr>
+        <td>1</td>
+        <td><a href="{{ url_for('upped', nom=img) }}">{{ img }}</a></td>
+        <td><a href="{{ url_for('upped', nom=img) }}">{{ img }}</a></td>
+        <td><a href="{{ url_for('upped', nom=img) }}">{{ img }}</a></td>
+        <td><a href="{{ url_for('upped', nom=img) }}">{{ img }}</a>>Edit</a></td>
+        <td>
+        <form action="" method="post">
+        <input type="hidden" name="methode" value="DELETE">
+        <input type="submit" value="Delete" class="btn btn-danger">
+        </form>
+        </td>
+        </tr>
+        {% endfor %}
+        {% endif %}
+    </table>
+    
+    <h1>Choisissez une image à Uploader :</h1>
+    <form action="" method="POST" enctype="multipart/form-data">
+        <label for="fic">Fichier</label>
+        <input id="fic" type="file" name="fic" />
+        <label for="pw">Mot de passe</label><br/>
+        <input id="pw" type="password" name="pw" /><br/>
+        <input id="btsub" type="submit" value="Uploader" />
+    </form>
+{% endblock %}

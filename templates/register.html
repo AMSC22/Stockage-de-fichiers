@@ -1,0 +1,47 @@
+{% extends 'Layout.html' %}
+
+{% block body %}
+    {% from "includes/formhelpers.html" import render_field %}
+    <div class="App">
+            <div class="App__Aside"></div>
+            <div class="App__Form">
+                <div class="PageSwitcher">
+                    <a href="/" class="PageSwitcher__Item">Sign In</a>
+                    <a href="/register" class="PageSwitcher__Item PageSwitcher__Item--Active">Sign Up</a>
+                </div>
+                <div class="FormTitle">
+                    <a href="/" class="FormTitle__Link">Sign In</a> or
+                    <a href="/register" class="FormTitle__Link FormTitle__Link--Active">Sign Up</a>
+                </div>
+                <div class="FormCenter">
+                    <form class="FormFields" method="POST" action="">
+                        <div class="FormField">
+                            {{render_field(form.FirstName, class_="FormField__Input", placeholder="Enter Your Full Name")}}
+                        </div>
+                        <div class="FormField">
+                            {{render_field(form.UserName, class_="FormField__Input", placeholder="Enter Your UserName")}}
+                        </div>
+                        <div class="FormField">
+                            {{render_field(form.email, class_="FormField__Input", placeholder="Enter Your Email")}}
+                        </div>
+                        <div class="FormField">
+                            {{render_field(form.password, class_="FormField__Input", placeholder="Enter Your Password")}}
+                        </div>
+                        <div class="FormField">
+                            {{render_field(form.confirm, class_="FormField__Input", placeholder="Confirm Your Password")}}
+                        </div>
+                        <div class="FormField">
+                            <label class="FormField__CheckboxLabel"> 
+                            {{render_field(form.hasAgreed, class_="FormField__Checkbox", type="checkbox")}}
+                            I agree all statements in <a href="" class="FormField__TermsLink">terms of service</a>
+                            </label>
+                        </div>
+                        <div class="FormField">
+                            <button class="FormField__Button mr-20">Sign Up</button>
+                            <a href="/" class="FormField__Link"> I'm already member </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+{% endblock  %}

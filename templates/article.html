@@ -1,0 +1,8 @@
+{% extends 'Layout.html' %}
+
+{% block body %}
+    <h1>{{article1.title}}</h1>
+    <small>Wrtten by {{article1.author}} on {{article1.create_date}}</small>
+    <hr>
+    <div>{{ article1.body | safe }}</div>
+{% endblock %}
