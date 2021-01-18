@@ -1,0 +1,15 @@
+{% block head %}
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+        <meta charset="utf-8">
+        <title>My First Application</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta http-equiv="refresh" content="" />
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/jquery-ui.css' )}}" type="text/css">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/jquery.css' )}}" type="text/css">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css' )}}" type="text/css">
+        <link rel="stylesheet" href="{{ url_for('static', filename='fontawesome/css/all.css') }}" type="text/css">
+        <script src="{{ url_for('static', filename='js/require.js' )}}" type="text/javascript" charset="utf-8"></script>
+    <head>
+{% endblock  %}

@@ -1,0 +1,156 @@
+{% block JS_Link %}
+<script src="{{ url_for('static', filename='Accueil_fichiers/main.js' )}}" type="text/javascript" charset="utf-8"></script>
+    <script>
+        $(function(){
+            $("div.hid1").hide();
+            $("div.hid2").hide();
+            var masterCheck = [];
+            var listCheckItems = [];
+
+            $("#masterCheck").on("click", function(){
+                // ID selector on Master Checkbox
+                masterCheck = $("#masterCheck");
+                // ID select on Items Container
+                listCheckItems = $("input:checkbox");
+                // Click Event on Master Check
+                
+                var isMasterChecked = $(this).is(":checked");
+                listCheckItems.prop("checked", isMasterChecked);
+                getSelectedItems();
+                
+                // Change Event on each items checkbox
+                listCheckItems.on("change", function(){
+                    // Total Checkboxes in list
+                    var totalItems = listCheckItems.length;
+                    // Total Checked Checkboxes in list
+                    var checkedItems = listCheckItems.filter(":checked").length;
+                    // If all are checked
+                    if(totalItems == checkedItems){
+                        masterCheck.prop("indeterminate", false);
+                        masterCheck.prop("checked", true);
+                    }
+                    // If none is checked
+                    else{
+                        masterCheck.prop("indeterminate", false);
+                        masterCheck.prop("checked", false);
+                    }
+                    getSelectedItems();
+                });
+            });
+
+            $("a#select-folders").on("click", function(){
+                $("input:checkbox:gt(3)").prop("indeterminate", false);
+                $("input:checkbox:gt(3)").prop("checked", false);
+                
+                // ID selector on Folder Checkbox
+                masterCheck = $("a#select-folders");
+                // ID select on Items Folder
+                listCheckItems = $("input:checkbox:gt(0):lt(3)");
+
+                // Click Event on Folder Master
+                listCheckItems.prop("checked", true);
+                getSelectedItems();
+            });
+
+            $("a#select-files").on("click", function(){
+                $("input:checkbox:lt(4)").prop("indeterminate", false);
+                $("input:checkbox:lt(4)").prop("checked", false);
+                // ID selector on File Checkbox
+                masterCheck = $("a#select-files");
+                // ID select on Items File
+                listCheckItems = $("input:checkbox:gt(3)");
+
+                // Click Event on File Master
+                listCheckItems.prop("checked", true);
+                getSelectedItems();
+            });
+
+            function getSelectedItems(){
+                var getCheckedValues = [];
+                getCheckedValues = [];
+                listCheckItems.filter(":checked").each(function(){
+                    getCheckedValues.push($(this).val());
+                });
+                if(getCheckedValues[0] == 'selectAll'){
+                    $("span#counter-select-all").text(getCheckedValues.length-1);
+                    $("div.dynamic-buttons button").show();
+                    $("div.dynamic-instructions").hide();
+                }else{
+                    $("span#counter-select-all").text(getCheckedValues.length);
+                }
+                if(getCheckedValues.length == 0){
+                    $("div.dynamic-buttons button").hide();
+                    $("div.dynamic-instructions").show();
+                }
+            }
+            
+            //$().on("click", function(){});
+
+            if($("button#sort-name i").hasClass("itemName")){
+                $("button#sort-name i").removeClass("itemName");
+                $("button#sort-name i").addClass("fa fa-arrow-down");
+            }
+            $("button#sort-name").on("click", function(){
+                $("button#sort-name i").addClass("fa fa-arrow-down");
+                $("button#last-modified i").removeClass("fa fa-arrow-down");
+                $("button#file-size i").removeClass("fa fa-arrow-down");
+            });
+            $("button#last-modified").on("click", function(){
+                $("button#sort-name i").removeClass("fa fa-arrow-down");
+                $("button#last-modified i").addClass("fa fa-arrow-down");
+                $("button#file-size i").removeClass("fa fa-arrow-down");
+            });
+            $("button#file-size").on("click", function(){
+                $("button#sort-name i").removeClass("fa fa-arrow-down");
+                $("button#last-modified i").removeClass("fa fa-arrow-down");
+                $("button#file-size i").addClass("fa fa-arrow-down");
+            });
+
+            var container = [];
+            for(var i=1; i <= $("span.item_name").length; i++){
+                container.push($("span." + i).text());
+            }
+
+            var event1key = { '96':'0', '97':'1', '98':'2', '99':'3', '100':'4', '101':'5', '102':'6', '103':'7', '104':'8', '105':'9', // Chiffres clavier num 
+                '48':'m0', '49':'m1', '50':'m2', '51':'m3', '52':'m4', '53':'m5', '54':'m6', '55':'m7', '56':'m8', '57':'m9', // Chiffres caracteres speciaux 
+                '65':'a', '66':'b', '67':'c', '68':'d', '69':'e', '70':'f', '71':'g', '72':'h', '73':'i', '74':'j', '75':'k', '76':'l', '77':'m', '78':'n', '79':'o', '80':'p', '81':'q', '82':'r', '83':'s', '84':'t', '85':'u', '86':'v', '87':'w', '88':'x', '89':'y', '90':'z', // Alphabet 
+                '37':'left', '39':'right', '38':'up', '40':'down', '13':'enter', '27':'esc', '32':'space', '107':'+', '109':'-', '33':'pageUp', '34':'pageDown' }// KEYCODES
+            
+            var event2key = { '96':'0', '97':'1', '98':'2', '99':'3', '100':'4', '101':'5', '102':'6', '103':'7', '104':'8', '105':'9', // Chiffres clavier num  
+                '65':'a', '66':'b', '67':'c', '68':'d', '69':'e', '70':'f', '71':'g', '72':'h', '73':'i', '74':'j', '75':'k', '76':'l', 
+                '77':'m', '78':'n', '79':'o', '80':'p', '81':'q', '82':'r', '83':'s', '84':'t', '85':'u', '86':'v', '87':'w', '88':'x', 
+                '89':'y', '90':'z'} // Alphabet
+        
+            $("input#seach_span_input").on("keydown", function(e){
+                var Word = $("input#seach_span_input").get(0).value;
+                if(e["keyCode"] in event2key){
+                    var Test = true;
+                    $("div.list_item").hide();
+                    for(var i=0; i < container.length; i++){
+                        if(Test){$("div.hid2").show();}
+                        else{$("div.hid2").hide();}
+                        if(container[i].toLowerCase().search(Word.toLowerCase()) != -1 && Word != ""){
+                            $("div.hid1").hide();
+                            $("div.hid2").hide();
+                            Test = false;
+                            console.log("2 = ", Word, container[i]);
+                            $("div.list_item:eq(" + i + ")").show();
+                        }else if( Test && Word != ""){
+                            $("div.hid1").show();
+                            $("div.hid2").hide();
+                        }
+                    }
+                } 
+            });
+
+            $("div.panel-heading button").on("click", function(){
+                $("div#collapseOne").removeAttr("hidden");
+                console.log($("div#collapseOne i.fa"));
+                $("div#collapseOne i.fa").removeClass("fa fa-caret-down");
+                console.log($("div#collapseOne"));
+                $("div#collapseOne i.item").addClass("fa fa-caret-up");
+                console.log($("div#collapseOne"));
+            });
+        });
+    </script>
+{% endblock %}

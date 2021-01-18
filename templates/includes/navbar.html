@@ -1,4 +1,5 @@
-<nav class="navbar navbar-default">
+{% block navbar %}
+<!--nav class="navbar navbar-default">
     <div class="container">
         <div class="navbar-header">
             <buton type="button" class="navbar-loggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
@@ -9,25 +10,24 @@
             </buton>
             <a class="navbar-left navbar-brand" href="#">My First Application</a>
         </div>
-            <div id="navbar" class="collapse navbar-collapse">
+        <div id="navbar" class="navbar">
+            {% if session.logged_in %}
+            <ul class="nav navbar-nav">
+                <li><a href="/">Home</a></li>
+                <li><a href="/about">About</a></li>
+                <li><a href="/documents">Documents</a></li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
                 {% if session.logged_in %}
-                <ul class="nav navbar-nav">
-                    <li><a href="/">Home</a></li>
-                    <li><a href="/about">About</a></li>
-                    <li><a href="/documents">Documents</a></li>
-                </ul>
-
-                <ul class="nav navbar-nav navbar-right">
-                
-                    {% if session.logged_in %}
-                        <li><a href="/dashboard">Dashboard</a></li>
-                        <li><a href="/logout">logout</a></li>
-                    {% else %}
-                        <li><a href="/register">Register</a></li>
-                        <li><a href="/login">login</a></li>
-                    {% endif %}
-                </ul>
+                    <li><a href="/dashboard">Dashboard</a></li>
+                    <li><a href="/logout">logout</a></li>
+                {% else %}
+                    <li><a href="/register">Register</a></li>
+                    <li><a href="/login">login</a></li>
                 {% endif %}
-            </div>
+            </ul>
+            {% endif %}
+        </div>
     </div>
-</nav>
+</nav-->
+{% endblock  %}
