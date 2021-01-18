@@ -3,17 +3,18 @@
 from flask import Flask, render_template, flash, redirect, url_for, session, request, logging, jsonify, send_file
 from wtforms import Form, StringField, TextAreaField, PasswordField, validators, RadioField, BooleanField
 from sqlalchemy import create_engine, MetaData, Table
+from werkzeug.utils import secure_filename
 from flask_marshmallow import Marshmallow
 from flask_sqlalchemy import SQLAlchemy
 from passlib.hash import sha256_crypt
 from datetime import datetime
 from functools import wraps
-import os
+import zipfile, os
 
 # Initialise app
 app = Flask(__name__)
 basedir = os.path.abspath(os.path.dirname(__file__))
-DOSSIER_UPS = 'E:/Projet1/Projet Test/Images/'
+DOSSIER_UPS = 'E:/Projet1/Projet/Documents/'
 
 # Database
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'db.sqlite')
@@ -124,7 +125,7 @@ SmsIdents_schema = SmsIdentSchema(many=True)
 now = datetime.now()
 date = now.strftime("%Y/%m/%d %H:%M:%S")
 
-@app.route('/') 
+@app.route('/h') 
 def index():
     session.clear()
     return render_template('Home.html')
@@ -164,7 +165,7 @@ def register():
     return render_template('register.html', form=form)
 
 # User Login
-@app.route('/login', methods=['GET', 'POST'])
+@app.route('/', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         # Get Form Fields
@@ -219,41 +220,203 @@ def extension_ok(nomfic):
     """ Renvoie True si le fichier possède une extension d'image valide. """
     return '.' in nomfic and nomfic.rsplit('.', 1)[1] in ('png', 'jpg', 'JPG', 'jpeg', 'gif', 'bmp')
 
+def folder_or_file(doc): # Test if doc is a folder a file
+    return os.path.isdir(doc) # os.path.isfile(doc)
+
+def Size(path):
+    unity = { '0': 'o', '1': 'ko', '2': 'Mo', '3': 'Go', '4': 'To' }
+    sizes, num = 0, 0
+    if folder_or_file(path):
+        for root, dirs, files in os.walk(path, 'topdown'):
+            for file in files: sizes += os.path.getsize(os.path.join(root, file))
+    else: sizes =  os.path.getsize(path)
+    size = sizes
+    while size > 0.9:
+        size = size/1024
+        num += 1
+    if num > 0:
+        size = str(sizes/1024**(num-1))
+        point = size.find('.') 
+        size = size[: point + 3] + ' ' + unity[str(num-1)]
+    else:
+        size = str(sizes/1024**num)
+        point = size.find('.') 
+        size = size[: point + 3] + ' ' + unity[str(num)]
+    return size
+
+def DateConverter(path):
+    date =  os.path.getmtime(path)
+    date = str(datetime.fromtimestamp(date))
+    point = date.find('.')
+    if point != -1: return date[: point]
+    else: return date
+
 # Dashboard
 @app.route('/dashboard', methods=["GET","POST"])
+@app.route('/dashboard/<folder>', methods=["GET","POST"])
 @is_logged_in
-def dashboard():
-    images = [img for img in os.listdir(DOSSIER_UPS) if extension_ok(img)] # la liste des images dans le dossier
-    return render_template('dashboard.html', images=images)
+def dashboard(folder=None):
+    folders, files, folderLink, filesize, fileLastModified, foldersize, folderLastModified = [], [], [], [], [], [], []
+    folderPath, folderPath1, fol = '', '', ''
+    if folder: DOSSIER_UP = os.path.join(DOSSIER_UPS, folder)
+    else: DOSSIER_UP = DOSSIER_UPS
+    for doc in os.listdir(DOSSIER_UP):
+        if folder_or_file(os.path.join(DOSSIER_UP, doc)):
+            if folder: 
+                folderLink.append(os.path.join(folder, doc))
+                folders.append(doc)
+            else: 
+                folderLink.append(doc)
+                folders.append(doc)
+            foldersize.append(Size(os.path.join(DOSSIER_UP, doc)))
+            folderLastModified.append(DateConverter(os.path.join(DOSSIER_UP, doc)))
+        else: 
+            filesize.append(Size(os.path.join(DOSSIER_UP, doc)))
+            fileLastModified.append(DateConverter(os.path.join(DOSSIER_UP, doc)))
+            files.append(doc)                    # [file for file in os.listdir(DOSSIER_UPS) if extension_ok(file)] # la liste des images dans le dossier
+    if folder: 
+        folderPath = folder.split('\\')
+        folderPath1 = folder[:folder.find(folderPath[-1])]
+        fol=folder
+    return render_template('dashboard.html', fol=fol, folderPath1=folderPath1, folderPath=folderPath, folderLink=folderLink, folders=folders, 
+    files=files, folderLen=len(folders), fileLen=len(files), filesize=filesize, fileLastModified=fileLastModified, foldersize=foldersize, folderLastModified=folderLastModified)
 
-@app.route('/up/view/<nom>')
-def upped(nom):
-    #nom = secure_filename(nom)
-    if os.path.isfile(DOSSIER_UPS + nom): # si le fichier existe
-        return send_file(DOSSIER_UPS + nom, as_attachment=True) #  on l'envoie
-    else:
-        flash(u'Fichier {nom} inexistant.'.format(nom=nom), 'error')
-        return redirect(url_for('liste_upped')) # sinon on redirige vers la liste des images, avec un message d'erreur
-
-@app.route('/upload', methods=['GET', 'POST'])
-def upload():
+# Edit or open a file by clicking on a file
+@app.route('/upped/<filePath>')
+@is_logged_in
+def upped(filePath):
+    if filePath.find('&&') != -1: filename = "/".join(filePath.split('&&'))
+    else: filename = filePath
+    FilePath = os.path.join(DOSSIER_UPS, filename)
+    os.popen('start ' + FilePath)
+    file =  os.path.dirname(filename)
+    if file: return redirect(url_for('dashboard', folder=file))
+    else: return redirect(url_for('dashboard'))
+    
+# Upload file
+@app.route('/upload/<folder>', methods=['GET', 'POST'])
+@is_logged_in
+def upload(folder=None):
     if request.method == 'POST':
-        if request.form['pw'] == 'up': # on vérifie que le mot de passe est bon
-            f = request.files['fic']
-            if f: # on vérifie qu'un fichier a bien été envoyé
-                if extension_ok(f.filename): # on vérifie que son extension est valide
-                    nom = f.filename # secure_filename(f.filename)
-                    f.save(DOSSIER_UPS + nom)
-                    flash(u'Image envoyée ! Voici <a href="{lien}">son lien</a>'.format(lien=url_for('upped', nom=nom)), 'error')
-                    return redirect(url_for('liste_upped'))
-                else:
-                    flash(u'Ce fichier ne porte pas une extension autorisée !', 'error')
-            else:
-                flash(u'Vous avez oublié le fichier !', 'error')
+        f = request.files['fic']
+        if f: # on vérifie qu'un fichier a bien été envoyé
+            nom = secure_filename(f.filename)
+            FilePath = os.path.join(DOSSIER_UPS, folder)
+            f.save(os.path.join(FilePath, nom))
+            return redirect(url_for('dashboard', folder=folder))
         else:
-            flash(u'Mot de passe incorrect', 'success')
-    return render_template('up_up.html')
+            flash(u"Vous n'avez pas selectionné un fichier !", 'error')        
+    return render_template('dashboard.html')
+
+# Create Folder and Rename file
+@app.route('/create_rename', methods=['GET', 'POST'])
+def create_rename():
+    # Rename file
+    if 'filename' in request.form.keys():
+        Url = request.form['Path']
+        Url1 = Url.split('/')
+        file, ext = os.path.splitext(request.form['filename'])
+        if Url1[1] == '':
+            OldName = os.path.join(DOSSIER_UPS, request.form['filename'])
+            NewName = os.path.join(DOSSIER_UPS, request.form['name'] + ext)
+        else:
+            if file != '' and ext != '':
+                Url = Url[Url.find(Url1[1]):]
+                OldName = os.path.join(DOSSIER_UPS, Url + request.form['filename'])
+                NewName = os.path.join(DOSSIER_UPS, Url + request.form['name'] + ext)
+            else:
+                Url = Url[Url.find(Url1[1]):]
+                OldName = os.path.join(DOSSIER_UPS, Url + request.form['filename'])
+                NewName = os.path.join(DOSSIER_UPS, Url + request.form['name'])
+        os.rename(OldName, NewName)
+    else:
+        # Create a Folder
+        Url = request.form['Path']
+        Url1 = Url.split('/')
+        if Url1[1] != '':
+            Url = Url[Url.find(Url1[1]):]
+            Path = os.path.join(DOSSIER_UPS, Url + request.form['name'])
+        else:
+            Path = os.path.join(DOSSIER_UPS, request.form['name'])
+        if(not os.path.exists(Path)):
+            os.mkdir(Path)
+        else: flash('This file already exist','error')
+    
+# Edit, Dowload or Delete Files or Folders
+@app.route('/edit_delete_download', methods=['GET', 'POST'])
+def edit_delete_download():
+    print("Path = ", request.form['Path'], request.form['filename'])
+    # Edit one or more files by checking
+    if request.form['work'] == 'edit':
+        Url = request.form['Path']
+        Url1 = Url.split('/')
+        if Url1[1] != '':
+            Url = Url[Url.find(Url1[1]):]
+            for file in request.form['filename'].split('/')[:-1]:
+                if file.find(' ') != -1: file = '"' + file + '"'
+                Path = os.path.join(DOSSIER_UPS, Url + file)
+                os.popen('start ' + Path)
+        else:
+            for file in request.form['filename'].split('/')[:-1]:
+                if file.find(' ') != -1: file = '"' + file + '"'
+                Path = os.path.join(DOSSIER_UPS, file)
+                os.popen('start ' + Path)
+    elif request.form['work'] == 'delete':
+        Url = request.form['Path']
+        Url1 = Url.split('/')
+        if Url1[1] != '':
+            Url = Url[Url.find(Url1[1]):]
+            for file in request.form['filename'].split('/')[:-1]:
+                if file.find(' ') != -1: file = '"' + file + '"'
+                Path = os.path.join(DOSSIER_UPS, Url + file)
+                Path = Path.replace('/', '\\')
+                os.popen('DEL ' + Path)
+        else:
+            for file in request.form['filename'].split('/')[:-1]:
+                if file.find(' ') != -1: file = '"' + file + '"'
+                Path = os.path.join(DOSSIER_UPS, file)
+                os.popen('DEL ' + Path)
+
+@app.route('/up')
+@app.route('/up/view/<nom>')
+def download(nom):
+    word = {}
+    folderDirectory = "/".join(nom.split("&&")[:-1]) + '/'
+    noms = nom.split("&&")[-1]
+    filename = noms.split('&')[:-1]
+    print("nom = ", folderDirectory, filename)
+    if len(filename) == 1:
+        if folderDirectory == '/': word['choice'] = send_file(DOSSIER_UPS + filename[0], as_attachment=True)
+        else: word['choice'] = send_file(DOSSIER_UPS + folderDirectory + filename[0], as_attachment=True)
+    else:
+        destination = os.path.dirname(os.path.dirname(DOSSIER_UPS))
+        destination = destination.replace('/', '\\') + '\\' + "Docu"
+        destidrive, sourcedrive = [], []
+        for i in filename:
+            if folderDirectory == '/': folderDirectori = i
+            else: folderDirectori = folderDirectory + i
+            if folder_or_file(DOSSIER_UPS + folderDirectori):
+                foldername = DOSSIER_UPS + folderDirectori
+                foldername = foldername.replace('/', '\\')
+                for root, dirs, files in os.walk(foldername, 'topdown'):
+                    for file in files:
+                        destidrive.append(os.path.join(root.replace(DOSSIER_UPS.replace('/', '\\')[:-1], destination), file))
+                        sourcedrive.append(root + '\\' + file)
+            else:
+                sourcedrive.append(DOSSIER_UPS.replace('/', '\\') + folderDirectori.replace('/', '\\'))
+                destidrive.append(destination + '\\' + i)
+        # Zip file Initilization
+        zipfolder = zipfile.ZipFile("file.zip", mode='w', compression=zipfile.ZIP_STORED, allowZip64=True) # Compression type. we can also use instead of ZIP_STORED, ZIP_DEFLATED, ZIP_BZIP2, ZIP_LZMA
+        # Zip all the files which are inside in the folder
+        for i in range(len(destidrive)):
+            zipfolder.write(sourcedrive[i], destidrive[i])
+        zipfolder.close()
+        send_file("file.zip", mimetype = 'zip', attachment_filename='file.zip', as_attachment=True)
+        os.remove("file.zip")
+        return redirect(url_for('dashboard', folder=folderDirectory[:-1]))
+
 # Run Server
 if __name__ == '__main__':
     app.secret_key = "secret_key1234"
     app.run(debug=True)
+    # app.run(host='0.0.0.0', port=8000, debug=False, threaded=True)
