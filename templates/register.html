@@ -1,5 +1,11 @@
 {% extends 'Layout.html' %}
 
+{% block head %} 
+<link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Merienda One">
+<link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Port Lligat Slab">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/styleForm.css' )}}" type="text/css"> 
+{% endblock  %}
+
 {% block body %}
     {% from "includes/formhelpers.html" import render_field %}
     <div class="App">

@@ -1,75 +1,721 @@
 {% extends 'layout.html' %}
 
+{% block head %} {% include 'includes/head.html' %} {% endblock  %}
+
+{% block messages %} {% include 'includes/messages.html' %} {% endblock  %}
+
+{% block navbar %} {% include 'includes/navbar.html' %} {% endblock  %}
+
 {% block body %}
-<script>
-    $(function(){
-    $('ul.parent > li').hover(function(){
-        $(this).find('ul.child').show(400);
-    }, function(){
-        $(this).find('ul.child').hide(400);
-    });
-    });
+    <body>
+        <div id="header" role="navigation" aria-label="Top Menu" style="display: block;">
+            <div id="header-container" class="container">
+                <div id="ipython_notebook" class="nav navbar-brand">
+                    <a href="#" title="dashboard">
+                        <!--img src="Accueil_fichiers/logo.png" alt="My First Application"-->
+                        <h1>Dashboard <small> Welcome {{session.username}}</small></h1>
+                    </a>
+                </div>
+                <span class="flex-spacer"></span>
+                <span id="shutdown_widget">
+                    <button id="shutdown" class="btn btn-sm navbar-btn" title="Stop the Jupyter server"> Quit</button>
+                </span>
+                <span id="login_widget">      
+                    <button id="logout" class="btn btn-sm navbar-btn">Logout</button>
+                </span>
+            </div>
+            <div class="header-bar"></div>
+        </div>
+        <div id="site" style="display: block; height: 596px;">
+            <div id="ipython-main-app" class="container">
+                <div id="tab_content" class="tabbable" role="main">
+                    <ul id="tabs" class="nav nav-tabs">
+                        <li class="active">
+                            <a href="#notebooks" data-toggle="tab" aria-expanded="true">Files</a>
+                        </li>
+                        <li class="">
+                            <a href="#running" data-toggle="tab" aria-expanded="false">Running</a>
+                        </li>
+                        <li class="">
+                            <a href="#clusters" data-toggle="tab" class="clusters_tab_link" aria-expanded="false">Clusters</a>
+                        </li>
+                    </ul>
+                    <div class="tab-content">
+                        <div id="notebooks" class="tab-pane active">
+                            <div id="notebook_toolbar" class="row list_toolbar">
+                                <div class="col-sm-6 no-padding">
+                                    <div class="dynamic-instructions" > Select items to perform actions on them.</div>
+                                    <div class="dynamic-buttons">
+                                        <button title="Rename selected" aria-label="Rename" class="rename-button btn btn-default btn-xs" data-toggle="modal" data-target="#RenameModal" style="display: none;">Rename</button>
+                                        <!-- Rename Modal -->
+                                        <div class="modal fade" id="RenameModal" tabindex="-1" role="dialog" aria-labelledby="RenameModalLabel" aria-hidden="true">
+                                            <div class="modal-dialog" role="document">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h4> Renommer le fichier </h4>
+                                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                            <span aria-hidden="true">&times;</span>
+                                                        </button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <h4 class="rename-error" hidden='true' style="color:red;" align=center> Vous n'avez pas entré un nom </h4>
+                                                        <h5> Saisir le nom du nouveau fichier : </h5>
+                                                        <input type="text" id="Rename" aria-placeholder="chemin" style="width: 450px;">
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn" data-dismiss="modal">Annuler</button>
+                                                        <button type="button" class="btn btn-primary rename"> Renommer </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <button title="Move selected" aria-label="Move" class="move-button btn btn-default btn-xs" data-toggle="modal" data-target="#MoveModal" style="display: none;">Move</button>
+                                        <!-- Move Modal -->
+                                        <div class="modal fade" id="MoveModal" tabindex="-1" role="dialog" aria-labelledby="MoveModalLabel" aria-hidden="true">
+                                            <div class="modal-dialog" role="document">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h4> Déplacer 22 éléments </h4>
+                                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                            <span aria-hidden="true">&times;</span>
+                                                        </button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <h5> Saisir un nouveau chemin de destination pour ces 22 éléments : </h5>
+                                                        <input type="text" aria-placeholder="chemin" style="width: 450px;">
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn" data-dismiss="modal">Annuler</button>
+                                                        <a href="#delete"><button type="button" class="btn btn-primary">Déplacer</button></a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <button title="Download selected" aria-label="Download" class="download-button btn btn-default btn-xs" data-toggle="modal" data-target="#DownloadModal" style="display: none;">
+                                        Download</button>
+                                        <!-- Share Modal -->
+                                        <div class="modal fade" id="DownloadModal" tabindex="-1" role="dialog" aria-labelledby="DownloadModalLabel" aria-hidden="true">
+                                                <div class="modal-dialog" role="document">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h4> Download </h4>
+                                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                                <span aria-hidden="true">&times;</span>
+                                                            </button>
+                                                        </div>
+                                                    <div class="modal-body">
+                                                        <h5 class="download"> Êtes-vous certain de vouloir Download ces « 0  » éléments sélectionnés ?</h5>
+                                                    </div>
+                                                    <div class="modal-footer download">
+                                                        <button type="button" class="btn" data-dismiss="modal">Annuler</button>
+                                                        <a href="{{ url_for('download', nom="name") }}"><button type="button" class="btn btn-primary download"> Download </button></a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div><button title="Edit selected" aria-label="Edit" class="edit-button btn btn-default btn-xs" style="display: none;">Edit</button>                                
+                                        <button title="Share selected" aria-label="Share selected" class="share-button btn btn-default btn-xs" data-toggle="modal" data-target="#ShareModal" style="display: none;">
+                                            Share
+                                        </button>
+                                        <!-- Share Modal -->
+                                        <div class="modal fade" id="ShareModal" tabindex="-1" role="dialog" aria-labelledby="ShareModalLabel" aria-hidden="true">
+                                                <div class="modal-dialog" role="document">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h4> Partage </h4>
+                                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                                <span aria-hidden="true">&times;</span>
+                                                            </button>
+                                                        </div>
+                                                    <div class="modal-body">
+                                                        <h5> Êtes-vous certain de vouloir partager ces « 0  » éléments sélectionnés ?</h5>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn" data-dismiss="modal">Annuler</button>
+                                                        <a href="#delete"><button type="button" class="btn btn-primary"> Partager </button></a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- Delete Modal -->
+                                        <button title="Delete selected" aria-label="Delete selected" class="delete-button btn btn-default btn-xs btn-danger" data-toggle="modal" data-target="#DeleteModal" style="display: none;">
+                                            <i class="fa fa-trash"></i>
+                                        </button>
+                                        <div class="modal fade" id="DeleteModal" tabindex="-1" role="dialog" aria-labelledby="DeleteModalLabel" aria-hidden="true">
+                                            <div class="modal-dialog" role="document">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h4> Supprimer </h4>
+                                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                            <span aria-hidden="true">&times;</span>
+                                                        </button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <h5 class="delete"> Êtes-vous certain de vouloir supprimer définitivement les « 0  » éléments sélectionnés ?</h5>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn" data-dismiss="modal">Annuler</button>
+                                                        <button type="button" class="btn btn-danger delete"> Supprimer </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6 no-padding tree-buttons">
+                                    <div class="pull-right btn-toolbar">
+                                        <div class="breadcome-heading btn-group mr-2">
+                                            <form id="alternate_search" class="alternate_upload sr-input-func">
+                                                <span id="list_info" class="toolbar_info">
+                                                    <input id="seach_span_input" type="search" placeholder="Search..." class="form-control" multiple="multiple" tabindex="-1">
+                                                    <a href="#"><i class="fa fa-search"></i></a>
+                                                </span>
+                                            </form>
+                                        </div>
+                                        <div id="new-buttons" class="btn-group mr-2">
+                                            <button class="dropdown-toggle btn btn-default" id="new-dropdown-button" data-toggle="dropdown">
+                                                <span>New</span>
+                                                <span class="sr-only">checkbox</span>
+                                                <span class="caret"></span>
+                                                <span class="sr-only">Toggle Dropdown</span>
+                                            </button>
+                                            <ul id="new-menu" class="dropdown-menu" role="menu">
+                                                <li role="none" id="new-file">
+                                                    <a title="Create a Folder" tabindex="-1" href="#" data-toggle="modal" data-target="#FolderModal">Create Folder</a>
+                                                </li>
+                                                <li role="none" id="new-folder">
+                                                    <a  href="#" title="Add one or more file" aria-label="Add one or more file" data-toggle="modal" data-target="#FileModal">Add File</a>
+                                                </li>
+                                            </ul>
+                                            <!-- Folder Modal -->
+                                            <div class="modal fade" id="FolderModal" tabindex="-1" role="dialog" aria-labelledby="FolderModalLabel" aria-hidden="true">
+                                                <div class="modal-dialog" role="document">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h4> Create Folder </h4>
+                                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                                <span aria-hidden="true">&times;</span>
+                                                            </button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <h4 class="create-error" hidden='true' style="color:red;" align=center> Vous n'avez pas entré un nom </h4>
+                                                            <h5> Enter the name of the folder </h5>
+                                                            <input type="text" aria-placeholder="chemin" id="Create" style="width: 450px;">
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn" data-dismiss="modal">Annuler</button>
+                                                            <button type="button" class="btn btn-primary create"> Create </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <!-- File Modal -->
+                                            <div class="modal fade" id="FileModal" tabindex="-1" role="dialog" aria-labelledby="FileModalLabel" aria-hidden="true">
+                                                <div class="modal-dialog" role="document">
+                                                    <div class="modal-content" style="margin:0;padding:0;background: no-repeat center center fixed;background-image: -moz-linear-gradient(#CDCBD0, #F0EDE9);background-image: -webkit-linear-gradient(#CDCBD0, #F0EDE9);background-size : cover;">
+                                                        <form action="{{ url_for( 'upload', folder=fol) }}" method="POST" enctype="multipart/form-data" style="font-family: Port Lligat Slab;text-shadow: 1px 1px 2px white;text-align: left;">
+                                                            <div class="modal-header">
+                                                                <h4 style="font-family: Merienda One;text-shadow: 1px 1px 2px #2C2235;font-size: 170%;"> Choose one or more files to Upload : </h4>
+                                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                                    <span aria-hidden="true" style="color:red;">&times;</span>
+                                                                </button>
+                                                            </div>
+                                                            <div class="modal-body" style="margin: auto;width: 50%;background-color: #F3F3F3;box-shadow: 0px 0px 30px black;border-radius: 10px;text-align:center;padding-top: 10px;padding-bottom: 40px;">
+                                                                <label for="fic" style="display: block; width: 120px; float:left; margin-left: 130px; position: relative; top: 3px;">File</label>
+                                                                <input id="fic" type="file" name="fic" />
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                                <button type="submit" style="position:relative;top: 3px;width: 140px;background-image: -moz-linear-gradient(#B31A16, #FF521E);background-image: -webkit-linear-gradient(#B31A16, #FF521E);color: white;border: none;border-radius: 3px;box-shadow: 1px 1px 7px black;font-size: 130%;font-family: Merienda One; font-weight:bold;"> Upload </button>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="btn-group mr-2">
+                                            <button id="refresh_list" title="Refresh list" aria-label="Refresh list" class="btn btn-default btn-xs">
+                                                <i class="fa fa-refresh item_icon icon-fixed-width"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="list_container">
+                                <div class="row list_header">
+                                    <div class="btn-group dropdown">
+                                        <button title="Select All or None" aria-label="Select All/None" type="button" class="btn btn-default btn-xs" id="button-select-all">
+                                            <input type="checkbox" class="pull-left" value="selectAll" id="masterCheck">
+                                            <span id="counter-select-all">0</span>
+                                        </button>
+                                        <button title="Select All Folders or Files" class="btn btn-default btn-xs dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                                            <span class="sr-only">checkbox</span>
+                                            <span class="caret"></span>
+                                            <span class="sr-only">Toggle Dropdown</span>
+                                        </button>
+                                        <ul id="selector-menu" class="dropdown-menu" role="menu" aria-labelledby="tree-selector-btn">
+                                            <li role="none">
+                                                <a id="select-folders" role="menuitem" href="#" title="Select All Folders">
+                                                    <i class="fa fa-folder" style="color: blue;"></i>&nbsp;Folders
+                                                </a>
+                                            </li>
+                                            <li role="none">
+                                                <a id="select-files" role="menuitem" tabindex="-1" href="#" title="Select All Files">
+                                                    <i class="fa fa-file"></i>&nbsp;Files
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div id="project_name">
+                                        <ul class="breadcrumb">
+                                            <li>
+                                                <a href="#" title="Link to root folder">
+                                                    <i class="fa fa-folder"></i>
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a class="Path" href="/dashboard" title="Link to root folder">dashboard</a>
+                                            </li>
+                                            {% if folderPath %}
+                                            {% for i in folderPath %}
+                                            <li>
+                                                <a class="Path" href="{{ url_for('dashboard', folder=folderPath1) }}" title="Link to root folder">{{ i }}</a>
+                                            </li>
+                                            {% endfor %}
+                                            {% endif %}
+                                        </ul>
+                                    </div>
+                                    <div id="sort_buttons" class="pull-right">
+                                        <div id="sort_name" class="sort_button">
+                                            <button type="button" title="Sort by name" class="btn btn-xs btn-default sort-action" id="sort-name" aria-label="Sort by name" style="margin-right:50px;">
+                                                Name
+                                                <i class="itemName"></i>
+                                            </button>
+                                        </div>
+                                        <div id="last_modified" class="sort_button">
+                                            <button type="button" title="Sort by last modified" class="btn btn-xs btn-default sort-action" id="last-modified" aria-label="Sort by last modified" style="margin-right:40px;">
+                                                Last Modified
+                                                <i class=""></i>
+                                            </button>
+                                        </div>
+                                        <div id="file_size" class="sort_button">
+                                            <button type="button" title="Sort by file size" class="btn btn-xs btn-default sort-action" id="file-size" aria-label="Sort by file size">
+                                                File size
+                                                <i class=""></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% if folders %}
+                                {% for i in range(folderLen) %}
+                                <div class="list_item row"  id="list-wrapper">
+                                    <div class="col-md-12 {{ i + 1 }}">
+                                        <input type="checkbox" title="Cliquer ici pour renommer, supprimer, etc.">
+                                        <i class="fa fa-folder item_icon icon-fixed-width"></i>
+                                        <a class="item_link {{ i + 1 }}" href="{{ url_for('dashboard', folder=folderLink[i]) }}">
+                                            <span class="item_name {{ i + 1 }}">{{ folders[i] }}</span>
+                                        </a>
+                                        <div class="pull-right">
+                                            <div class="pull-right">
+                                                <span class="item_modified pull-left" title="{{ folderLastModified[i] }}">{{ folderLastModified[i] }}</span>
+                                                <span class="file_size pull-right">{{ foldersize[i] }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                                {% endif %}
+                                {% if files %}
+                                {% for file in range(fileLen) %}
+                                <div class="list_item row"  id="list-wrapper">
+                                    <div class="col-md-12 {{ folderLen + file + 1 }}">
+                                        <input type="checkbox" title="Cliquer ici pour renommer, supprimer, etc.">
+                                        <i class="fa fa-file-word item_icon icon-fixed-width"></i>
+                                        {% if fol %}
+                                        <a class="item_link {{ folderLen + file + 1 }}" href="{{ url_for('upped', filePath=fol + '&&' + files[file]) }}">
+                                            <span class="item_name {{ folderLen + file + 1 }}">{{ files[file] }}</span>
+                                        </a>
+                                        {% else %}
+                                        <a class="item_link {{ folderLen + file + 1 }}" href="{{ url_for('upped', filePath=files[file]) }}">
+                                            <span class="item_name {{ folderLen + file + 1 }}">{{ files[file] }}</span>
+                                        </a>
+                                        {% endif %}
+                                        <div class="pull-right">
+                                            <div class="pull-right">
+                                                <span class="item_modified pull-left" title="{{ fileLastModified[file] }}">{{ fileLastModified[file] }}</span>
+                                                <span class="file_size pull-right">{{ filesize[file] }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                                {% endif %}
+                            </div>
+                            <div class="hid1" align="center" hidden='true'><p>No item matches your search.</p></div>
+                            <div class="hid2" align="center" hidden='true'><p>Search...</p>
+                        </div>
+                    </div>
+
+                    {% block Messages %} {% include 'Messages.html' %} {% endblock  %}
+                
+                </div><!-- class:tab-content -->
+            </div><!-- id:tab_content -->
+        </div><!-- ipython-main-app  -->
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js' )}}" type="text/javascript" charset="utf-8"></script>
+    <script>
+        $(function(){
+            var masterCheck = [];
+            var listCheckItems = [];
+
+            $("#masterCheck").on("click", function(){
+                // ID selector on Master Checkbox
+                masterCheck = $("#masterCheck");
+                // ID select on Items Container
+                listCheckItems = $("input:checkbox");
+                // Click Event on Master Check
+                
+                var isMasterChecked = $(this).is(":checked");
+                listCheckItems.prop("checked", isMasterChecked);
+                getSelectedItems();
+                
+                // Change Event on each items checkbox
+                listCheckItems.on("change", function(){
+                    // Total Checkboxes in list
+                    var totalItems = listCheckItems.length;
+                    // Total Checked Checkboxes in list
+                    var checkedItems = listCheckItems.filter(":checked").length;
+                    // If all are checked
+                    if(totalItems == checkedItems){
+                        masterCheck.prop("indeterminate", false);
+                        masterCheck.prop("checked", true);
+                    }
+                    // If none is checked
+                    else{
+                        masterCheck.prop("indeterminate", false);
+                        masterCheck.prop("checked", false);
+                    }
+                    getSelectedItems();
+                });
+            });
+
+            $("a#select-folders").on("click", function(){
+                $("input:checkbox:gt(3)").prop("indeterminate", false);
+                $("input:checkbox:gt(3)").prop("checked", false);
+                
+                // ID selector on Folder Checkbox
+                masterCheck = $("a#select-folders");
+                // ID select on Items Folder
+                listCheckItems = $("input:checkbox:gt(0):lt(3)");
+
+                // Click Event on Folder Master
+                listCheckItems.prop("checked", true);
+                getSelectedItems();
+            });
+
+            $("a#select-files").on("click", function(){
+                $("input:checkbox:lt(4)").prop("indeterminate", false);
+                $("input:checkbox:lt(4)").prop("checked", false);
+                // ID selector on File Checkbox
+                masterCheck = $("a#select-files");
+                // ID select on Items File
+                listCheckItems = $("input:checkbox:gt(3)");
+
+                // Click Event on File Master
+                listCheckItems.prop("checked", true);
+                getSelectedItems();
+            });
+
+            $("input:checkbox").on("click", function(){
+                // ID select one or more Item File
+                listCheckItems = $("input:checkbox");
+                getSelectedItems();
+            });
+
+            function getSelectedItems(){
+                var getCheckedValues = [];
+                listCheckItems.filter(":checked").each(function(){
+                    getCheckedValues.push($(this).val());
+                });
+                if(getCheckedValues[0] == 'selectAll'){
+                    $("span#counter-select-all").text(getCheckedValues.length-1);
+                    hideShow(getCheckedValues.length)
+                }else{
+                    $("span#counter-select-all").text(getCheckedValues.length);
+                    hideShow(getCheckedValues.length)
+                }
+            }
+
+            function hideShow(len){
+                if(len == 0){
+                    $("div.dynamic-buttons button").hide();
+                    $("div.dynamic-instructions").show();
+                }else if(len == 1){
+                    $("div.dynamic-buttons button").show();
+                    $("div.dynamic-instructions").hide();
+                }else if(len > 1){
+                    $("div.dynamic-buttons button.rename-button").hide();
+                    $("div.dynamic-buttons button:gt(0)").show();
+                    $("div.dynamic-instructions").hide();
+                }
+            }
+
+            if($("button#sort-name i").hasClass("itemName")){
+                $("button#sort-name i").removeClass("itemName");
+                $("button#sort-name i").addClass("fa fa-arrow-down");
+            }
+            // Sort elements by name
+            $("button#sort-name").on("click", function(){
+                $("button#sort-name i").addClass("fa fa-arrow-down");
+                $("button#last-modified i").removeClass("fa fa-arrow-down");
+                $("button#file-size i").removeClass("fa fa-arrow-down");
+                
+                var $list = $('span.item_name');
+                console.log($list);
+                $list.children().detach().sort(function(a, b){
+                    return $(a).text().localeCompare($(b).text());
+                }).appendTo($list);
+                console.log($list);
+            });
+            // Sort elements by last modified
+            $("button#last-modified").on("click", function(){
+                $("button#sort-name i").removeClass("fa fa-arrow-down");
+                $("button#last-modified i").addClass("fa fa-arrow-down");
+                $("button#file-size i").removeClass("fa fa-arrow-down");
+
+                var $list = $('span.item_modified');
+                console.log($list);
+                $list.children().detach().sort(function(a, b){
+                    return $(a).text().localeCompare($(b).text());
+                }).appendTo($list);
+                $('span.item_modified').html($list);
+                console.log($list);
+            });
+            // Sort elements by size
+            $("button#file-size").on("click", function(){
+                $("button#sort-name i").removeClass("fa fa-arrow-down");
+                $("button#last-modified i").removeClass("fa fa-arrow-down");
+                $("button#file-size i").addClass("fa fa-arrow-down");
+                
+                //var $list = $('span.file_size');
+                //console.log($list);
+                $('span.file_size').children().detach().sort(function(a, b){
+                    return $(a).text().localeCompare($(b).text());
+                }).appendTo($('span.file_size'));
+                // $('span.file_size').html($list);
+                // console.log($list);
+            });
+
+            var container = [];
+            for(var i=1; i <= $("span.item_name").length; i++){
+                container.push($("span." + i).text());
+            }
+
+            var event1key = { '96':'0', '97':'1', '98':'2', '99':'3', '100':'4', '101':'5', '102':'6', '103':'7', '104':'8', '105':'9', // Chiffres clavier num 
+                '48':'m0', '49':'m1', '50':'m2', '51':'m3', '52':'m4', '53':'m5', '54':'m6', '55':'m7', '56':'m8', '57':'m9', // Chiffres caracteres speciaux 
+                '65':'a', '66':'b', '67':'c', '68':'d', '69':'e', '70':'f', '71':'g', '72':'h', '73':'i', '74':'j', '75':'k', '76':'l', '77':'m', '78':'n', '79':'o', '80':'p', '81':'q', '82':'r', '83':'s', '84':'t', '85':'u', '86':'v', '87':'w', '88':'x', '89':'y', '90':'z', // Alphabet 
+                '37':'left', '39':'right', '38':'up', '40':'down', '13':'enter', '27':'esc', '32':'space', '107':'+', '109':'-', '33':'pageUp', '34':'pageDown' }// KEYCODES
+            
+            var event2key = { '96':'0', '97':'1', '98':'2', '99':'3', '100':'4', '101':'5', '102':'6', '103':'7', '104':'8', '105':'9', // Chiffres clavier num  
+                '65':'a', '66':'b', '67':'c', '68':'d', '69':'e', '70':'f', '71':'g', '72':'h', '73':'i', '74':'j', '75':'k', '76':'l', 
+                '77':'m', '78':'n', '79':'o', '80':'p', '81':'q', '82':'r', '83':'s', '84':'t', '85':'u', '86':'v', '87':'w', '88':'x', 
+                '89':'y', '90':'z', '8':'delete'} // Alphabet
+            
+            // Search file or folder
+            $("input#seach_span_input").on("keydown", function(e){
+                var Word = $("input#seach_span_input").get(0).value;
+                //console.log('e["keyCode"] = ', e["keyCode"]);
+                if(e["keyCode"] in event2key){
+                    var Test = true;
+                    $("div.list_item").hide();
+                    for(var i=0; i < container.length; i++){
+                        if(Test){$("div.hid2").show();}
+                        else{$("div.hid2").hide();}
+                        if(container[i].toLowerCase().search(Word.toLowerCase()) != -1 && Word != ""){
+                            $("div.hid1").hide();
+                            $("div.hid2").hide();
+                            Test = false;
+                            $("div.list_item:eq(" + i + ")").show();
+                        }else if( Test && Word != ""){
+                            $("div.hid1").show();
+                            $("div.hid2").hide();
+                        }
+                    }
+                    if(Word == ""){
+                        $("div.hid1").hide();
+                        $("div.hid2").hide();
+                        $("div.list_item").show();
+                    }
+                } 
+            });
+            
+            // Rename File or Folder
+            $("button.rename").on("click", function(){
+                var getCheckedIndex = elementSelected();
+
+                // Test if User has entred a name
+                if($("input#Rename").val()){
+                    // Extract the path of the file or folder checked
+                    href = ''
+                    $("ul.breadcrumb a.Path").each(function(){
+                        href += $(this).text() + '/';
+                    });
+                    filename = $("span." + getCheckedIndex[0]).text();
+                    // Send Path and name of element to Flask
+                    my_data = {"Path": href, 'name': $("input#Rename").val(), 'filename': filename};
+                    Loading('/create_rename', my_data, 'POST', $("button.rename"));
+                }else{
+                    // if no name is entred
+                    $("h4.rename-error").show();
+                }
+            });
+
+            // Create Folder
+            $("button.create").on("click", function(){
+                // Test if User has entred a name
+                if($("input#Create").val()){
+                    // Extract the path of the file or folder checked
+                    href = ''
+                    $("ul.breadcrumb a.Path").each(function(){
+                        href += $(this).text() + '/';
+                    });
+                    // Send Path and name of element to Flask
+                    my_data = {"Path": href, 'name': $("input#Create").val()};
+                    Loading('/create_rename', my_data, 'POST', $("button.create"));
+                }else{
+                    // if no name is entred
+                    $("h4.create-error").show();
+                }
+            });
+
+            // Edit file
+            $('button.edit-button').on("click", function(){
+                var getCheckedIndex = elementSelected();
+                // Extract the path of the file checked
+                href = '', filename = [];
+                $("ul.breadcrumb a.Path").each(function(){
+                    href += $(this).text() + '/';
+                });
+                // Extract the name of all checked files
+                filename = '';
+                for(var i=0; i < getCheckedIndex.length; i++){
+                    filename += $("span." + getCheckedIndex[i]).text() + '/';
+                }
+                console.log(href, filename);
+                // Send Path and name of element to Flask
+                my_data = {"Path": href, 'filename': filename, 'work': 'edit'};
+                Loading('/edit_delete_download', my_data, 'POST', $("button.edit-button"));
+            });
+
+            // Change The Delete Text
+            var n = '0';
+            $("button.delete-button").on("click", function(){
+                // Select all the checked input or element
+                listCheckItems = $("input:checkbox");
+                // Extract the index of checked element to rename
+                var Num = 0;
+                listCheckItems.filter("input:checkbox").each(function(){
+                    if($(this).is(":checked")){
+                        Num += 1;
+                    }
+                });
+                var texte = $("h5.delete").text();
+                texte = texte.replace(n, Num);
+                $("h5.delete").text(texte);
+                n = Num;
+            });
+
+            // Delete File or Folder
+            $("button.delete").on("click", function(){
+                var getCheckedIndex = elementSelected();
+                // Extract the path of the file or folder checked
+                href = ''
+                $("ul.breadcrumb a.Path").each(function(){
+                    href += $(this).text() + '/';
+                });
+                // Extract the name of all checked files
+                filename = '';
+                for(var i=0; i < getCheckedIndex.length; i++){
+                    filename += $("span." + getCheckedIndex[i]).text() + '/';
+                }
+                // Send Path and name of element to Flask
+                my_data = {"Path": href, 'filename': filename, 'work': 'delete'};
+                Loading('/edit_delete_download', my_data, 'POST', $("button.delete"));
+            });
+
+            // Change The Delete Text
+            var n = '0';
+            $("button.download-button").on("click", function(){
+                // Select all the checked input or element
+                listCheckItems = $("input:checkbox");
+                // Extract the index of checked element to rename
+                var Num = 0;
+                listCheckItems.filter("input:checkbox").each(function(){
+                    if($(this).is(":checked")){
+                        Num += 1;
+                    }
+                });
+                var texte = $("h5.download").text();
+                texte = texte.replace(n, Num);
+                $("h5.download").text(texte);
+                n = Num;
+            });
+            
+            $("button.download-button").on("click", function(){
+                var getCheckedIndex = elementSelected();
+                // Extract the path of the file or folder checked
+                href = ''
+                $("ul.breadcrumb a.Path").each(function(i){
+                    if(i != 0){href += $(this).text() + '&&';}
+                });
+                // Extract the name of all checked files
+                filename = '';
+                for(var i=0; i < getCheckedIndex.length; i++){
+                    filename += $("span." + getCheckedIndex[i]).text() + '&';
+                }
+                Path1 = $('div.download').html();
+                Path2 = href + filename;
+                Path1 = Path1.replace('name',  Path2);
+                $('div.download').html(Path1);
+            });
+
+            function elementSelected(){
+                var getCheckedIndex = [];
+                // Select all the checked input or element
+                listCheckItems = $("input:checkbox");
+                // Extract the index of checked element to rename
+                listCheckItems.filter("input:checkbox").each(function(i){
+                    if($(this).is(":checked")){
+                        getCheckedIndex.push(i);
+                    }
+                });
+                return getCheckedIndex;
+            }
+
+            function Loading(Url, my_data, Type, Button){
+                $.ajax({
+                    url: Url,
+                    data: my_data,
+                    type: Type,
+                    success: function(response){
+                        console.log('response = ', response);
+                    },
+                    error: function(error){
+                        Button.text('loading...').delay(1000).queue(function(){
+                            $(this).hide();
+                            location.reload(true);
+                            $(this).dequeue();
+                        });
+                    }
+                });
+            }
+
+            $('div.download button.download').on("click", function(){
+                console.log("data1 = ");
+                $.get('/up', function(data){
+                    console.log("data2 = ", data);
+                });
+            });
+        }); //$().on("click", function(){});
     </script>
-    <h1>Dashboard <small> Welcome {{session.username}}</small></h1>
-    
-    <form class="btn btn-success" action="/dashboard" method="POST">
-        <select class="btn btn-success" size="1" name="documents">
-            <option selected >Add New Things </option>
-            <option value="folder"><a href="#" >Add New Folder</a></option>
-            <option value="file"><a href="#" >Add New File </a></option>
-        </select>
-        <input type="submit" value="Submit">
-    </form>
-
-    <ul class="parent">
-            <li>Item 1</li>
-            <li>Item 2
-                <ul class="child">
-                    <li>Item 2.1</li>
-                    <li>Item 2.2</li>
-                    <li>Item 2.3</li>
-                    <li>Item 2.4</li>
-                </ul>
-            </li>
-        </ul>
-
-    <hr>
-    <table class="table table-striped">
-        <tr>
-            <th>ID</th>
-            <th>Names</th>
-            <th>Modifié le</th>
-            <th>Type</th>
-            <th>Taille</th>
-            <th></th>
-        </tr>
-
-        
-        {% if images %}
-        {% for img in images %}
-        <tr>
-        <td>1</td>
-        <td><a href="{{ url_for('upped', nom=img) }}">{{ img }}</a></td>
-        <td><a href="{{ url_for('upped', nom=img) }}">{{ img }}</a></td>
-        <td><a href="{{ url_for('upped', nom=img) }}">{{ img }}</a></td>
-        <td><a href="{{ url_for('upped', nom=img) }}">{{ img }}</a>>Edit</a></td>
-        <td>
-        <form action="" method="post">
-        <input type="hidden" name="methode" value="DELETE">
-        <input type="submit" value="Delete" class="btn btn-danger">
-        </form>
-        </td>
-        </tr>
-        {% endfor %}
-        {% endif %}
-    </table>
-    
-    <h1>Choisissez une image à Uploader :</h1>
-    <form action="" method="POST" enctype="multipart/form-data">
-        <label for="fic">Fichier</label>
-        <input id="fic" type="file" name="fic" />
-        <label for="pw">Mot de passe</label><br/>
-        <input id="pw" type="password" name="pw" /><br/>
-        <input id="btsub" type="submit" value="Uploader" />
-    </form>
+</body>
 {% endblock %}
