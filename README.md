@@ -2,6 +2,7 @@
  permet de stoquer et de partager ses fichiers en toute sécurié
 
 1-) Open the folder which contains you project with a text editor.
+
 2-) Open your terminal and redirect the path to your path folder by typing this command prompt
 	
 	cd path-of-your-folder
